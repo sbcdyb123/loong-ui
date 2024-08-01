@@ -1,0 +1,20 @@
+{
+  "name": "loong-ui",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@loong/utils": "workspace:*",
+    "@loong/components": "workspace:*",
+    "@loong/theme-chalk": "workspace:*",
+    "typescript": "^5.5.4",
+    "vue": "^3.4.35"
+  }
+}
