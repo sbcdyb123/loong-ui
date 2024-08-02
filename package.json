@@ -11,10 +11,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@loong/utils": "workspace:*",
     "@loong/components": "workspace:*",
     "@loong/theme-chalk": "workspace:*",
+    "@loong/utils": "workspace:*",
     "typescript": "^5.5.4",
     "vue": "^3.4.35"
+  },
+  "devDependencies": {
+    "sass": "^1.77.8"
   }
 }
