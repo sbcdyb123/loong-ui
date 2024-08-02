@@ -1,11 +1,11 @@
-<script setup lang="ts">
-import { createNameSpace } from "@loong/utils/create";
-const bem = createNameSpace("icon");
-console.log(bem.b("box"));
-</script>
-
 <template>
-  <div>ces</div>
+  <l-icon :color="'red'" :size="20">
+    <AccessibilitySharp />
+  </l-icon>
 </template>
+
+<script setup lang="ts">
+import { AccessibilitySharp } from "@vicons/ionicons5";
+</script>
 
 <style scoped></style>
