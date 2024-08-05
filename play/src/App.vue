@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { AccessibilitySharp } from "@vicons/ionicons5";
+import { AccessibilitySharp } from '@vicons/ionicons5'
 </script>
 
 <style scoped></style>
