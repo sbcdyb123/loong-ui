@@ -1,11 +1,10 @@
 <template>
-  <l-icon :color="'red'" :size="20">
-    <AccessibilitySharp />
-  </l-icon>
+  <TreeTest></TreeTest>
+  <l-icon></l-icon>
 </template>
 
 <script setup lang="ts">
-import { AccessibilitySharp } from '@vicons/ionicons5'
+import TreeTest from './components/treeTest.vue'
 </script>
 
 <style scoped></style>

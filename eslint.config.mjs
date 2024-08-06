@@ -14,9 +14,10 @@ export default [
   eslintConfigPrettier,
   {
     rules: {
-      'no-console': 'error',
       'no-debugger': 'error',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      // any warn
+      '@typescript-eslint/no-explicit-any': 'warn'
     }
   }
 ]
