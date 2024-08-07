@@ -1,12 +1,21 @@
 <template>
   <div :class="bem.b()">
-    <l-tree-node v-for="node in flattenTree" :key="node.key" :node="node" :expanded="isExpanded(node)" @toggle="toggleExpand"> </l-tree-node>
+    <l-tree-node
+      v-for="node in flattenTree"
+      :key="node.key"
+      :node="node"
+      :expanded="isExpanded(node)"
+      :loadingKeys="loadingKeys"
+      @toggle="toggleExpand"
+    >
+      123
+    </l-tree-node>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { TreeNode, TreeOption, treeProps } from './tree'
+import { key, TreeNode, TreeOption, treeProps } from './tree'
 import { createNameSpace } from '@loong/utils/create'
 import LTreeNode from './treeNode.vue'
 defineOptions({
@@ -16,7 +25,11 @@ const props = defineProps(treeProps)
 const tree = ref<TreeNode[]>([])
 const bem = createNameSpace('tree')
 // 初始化行为
-const createActions = (keyField: string, labelField: string, childrenField: string) => {
+const createActions = (
+  keyField: string,
+  labelField: string,
+  childrenField: string
+) => {
   return {
     getKey(node: TreeOption) {
       return node[keyField] as string
@@ -29,9 +42,13 @@ const createActions = (keyField: string, labelField: string, childrenField: stri
     }
   }
 }
-const actions = createActions(props.keyField, props.labelField, props.childrenField)
+const actions = createActions(
+  props.keyField,
+  props.labelField,
+  props.childrenField
+)
 // 初始化树结构
-const createTree = (data: TreeOption[]): TreeNode[] => {
+const createTree = (data: TreeOption[], parent?: TreeNode): TreeNode[] => {
   // 递归
   function traversal(data: TreeOption[], parent?: TreeNode): TreeNode[] {
     return data.map(node => {
@@ -43,7 +60,7 @@ const createTree = (data: TreeOption[]): TreeNode[] => {
         rawNode: node,
         level: parent ? parent.level + 1 : 0,
         // 判断是否是叶子节点
-        isLeft: node.isLeft ?? children.length === 0
+        isLeaf: node.isLeaf ?? children.length === 0
       }
       if (children.length > 0) {
         treeNode.children = traversal(children, treeNode)
@@ -51,7 +68,7 @@ const createTree = (data: TreeOption[]): TreeNode[] => {
       return treeNode
     })
   }
-  const result = traversal(data)
+  const result = traversal(data, parent)
   return result
 }
 // 监控数据变化
@@ -101,8 +118,24 @@ function collpase(node: TreeNode) {
   expandedKeysSet.value.delete(node.key)
 }
 // 展开
+const loadingKeys = ref(new Set<key>())
+const triggerLoading = (node: TreeNode) => {
+  if (!node.children.length && !node.isLeaf) {
+    if (!loadingKeys.value.has(node.key) && !loadingKeys.value.has(node.key)) {
+      loadingKeys.value.add(node.key)
+      if (props.onLoad) {
+        props.onLoad(node.rawNode).then(children => {
+          node.rawNode.children = children
+          node.children = createTree(children, node)
+          loadingKeys.value.delete(node.key)
+        })
+      }
+    }
+  }
+}
 function expand(node: TreeNode) {
   expandedKeysSet.value.add(node.key)
+  triggerLoading(node)
 }
 // 切换
 function toggleExpand(node: TreeNode) {

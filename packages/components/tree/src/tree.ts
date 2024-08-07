@@ -1,19 +1,19 @@
 import { ExtractPropTypes, PropType } from 'vue'
 
-type key = string | number
+export type key = string | number
 
 export interface TreeNode extends Required<TreeOption> {
   level: number
   rawNode: TreeOption
   children: TreeNode[]
-  isLeft: boolean
+  isLeaf: boolean
 }
 
 export interface TreeOption {
   label?: key
   key?: key
   children?: TreeOption[]
-  isLeft?: boolean
+  isLeaf?: boolean
   [key: string]: unknown
 }
 
@@ -37,7 +37,8 @@ export const treeProps = {
   defalutExpandedKeys: {
     type: Array as PropType<key[]>,
     default: () => []
-  }
+  },
+  onLoad: Function as PropType<(node: TreeOption) => Promise<TreeOption[]>>
 } as const
 
 export const treeNodeProps = {
@@ -47,6 +48,10 @@ export const treeNodeProps = {
   },
   expanded: {
     type: Boolean,
+    required: true
+  },
+  loadingKeys: {
+    type: Set as PropType<Set<key>>,
     required: true
   }
 } as const
