@@ -1,7 +1,13 @@
 <template>
-  <div :class="bem.b()">
+  <div
+    :class="[
+      bem.b(),
+      bem.is('selected', isSelected),
+      bem.is('disabled', node.disabled)
+    ]"
+  >
     <div
-      :class="bem.e('content')"
+      :class="[bem.e('content')]"
       :style="{ paddingLeft: `${(node?.level ?? 0) * 16}px` }"
     >
       <span
@@ -17,7 +23,9 @@
           <Loading v-else />
         </l-icon>
       </span>
-      <span>{{ node?.label }}</span>
+      <span :class="bem.e('label')" @click="handleSelected">
+        <LTreeNodeContent :node="node" />
+      </span>
     </div>
   </div>
 </template>
@@ -29,15 +37,26 @@ import LIcon from '@loong/components/icon'
 import Switcher from './icon/Switcher'
 import Loading from './icon/Loading'
 import { computed } from 'vue'
+import LTreeNodeContent from './tree-node-content'
 const props = defineProps(treeNodeProps)
 const emit = defineEmits(treeNodeEmitts)
 const bem = createNameSpace('tree-node')
 const handleExpand = () => {
+  if (props.node.disabled) return
   emit('toggle', props.node)
 }
 const isLoading = computed(() => {
   return props.loadingKeys.has(props.node?.key)
 })
+const isSelected = computed(() => {
+  return props.selectKeys.includes(props.node.key)
+})
+const handleSelected = () => {
+  if (props.node.disabled) {
+    return
+  }
+  emit('select', props.node)
+}
 </script>
 
 <style lang="scss" scoped></style>

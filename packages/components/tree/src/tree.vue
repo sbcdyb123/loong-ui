@@ -1,23 +1,35 @@
 <template>
   <div :class="bem.b()">
-    <l-tree-node
-      v-for="node in flattenTree"
-      :key="node.key"
-      :node="node"
-      :expanded="isExpanded(node)"
-      :loadingKeys="loadingKeys"
-      @toggle="toggleExpand"
-    >
-      123
-    </l-tree-node>
+    <l-virtual-list :items="flattenTree" :remain="8" :size="35">
+      <template #defalut="{ node }">
+        <l-tree-node
+          :key="node.key"
+          :node="node"
+          :expanded="isExpanded(node)"
+          :loadingKeys="loadingKeys"
+          :selectKeys="selectKeysRef"
+          @select="handleSelect"
+          @toggle="toggleExpand"
+        >
+        </l-tree-node>
+      </template>
+    </l-virtual-list>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { key, TreeNode, TreeOption, treeProps } from './tree'
+import { computed, provide, ref, useSlots, watch } from 'vue'
+import {
+  key,
+  treeEmitts,
+  treeInjectKey,
+  TreeNode,
+  TreeOption,
+  treeProps
+} from './tree'
 import { createNameSpace } from '@loong/utils/create'
 import LTreeNode from './treeNode.vue'
+import LVirtualList from '@loong/components/virtual-list/index'
 defineOptions({
   name: 'l-tree'
 })
@@ -59,6 +71,7 @@ const createTree = (data: TreeOption[], parent?: TreeNode): TreeNode[] => {
         children: [],
         rawNode: node,
         level: parent ? parent.level + 1 : 0,
+        disabled: !!node.disabled,
         // 判断是否是叶子节点
         isLeaf: node.isLeaf ?? children.length === 0
       }
@@ -76,7 +89,6 @@ watch(
   () => props.data,
   data => {
     tree.value = createTree(data)
-    console.log(tree.value)
   },
   {
     immediate: true
@@ -146,6 +158,47 @@ function toggleExpand(node: TreeNode) {
     expand(node)
   }
 }
+
+// 实现选中节点
+const emit = defineEmits(treeEmitts)
+
+const selectKeysRef = ref<key[]>([])
+
+watch(
+  () => props.selectedKeys,
+  keys => {
+    if (keys) {
+      selectKeysRef.value = keys
+    }
+  },
+  {
+    immediate: true
+  }
+)
+const handleSelect = (node: TreeNode) => {
+  let keys = Array.from(selectKeysRef.value)
+
+  if (!props.selectable) return
+  if (props.multiple) {
+    const index = keys.findIndex(key => key === node.key)
+    if (index > -1) {
+      keys.splice(index)
+    } else {
+      keys.push(node.key)
+    }
+  } else {
+    if (keys.includes(node.key)) {
+      keys = []
+    } else {
+      keys = [node.key]
+    }
+  }
+  emit('update:selectedKeys', keys)
+}
+
+provide(treeInjectKey, {
+  slots: useSlots()
+})
 </script>
 
 <style scoped></style>
