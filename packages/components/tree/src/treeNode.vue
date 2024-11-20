@@ -23,6 +23,13 @@
           <Loading v-else />
         </l-icon>
       </span>
+      <LCheckbox
+        v-if="showCheckbox"
+        :model-value="checked"
+        :disabled="disabled"
+        :indeterminate="indeterminate"
+        @change="handleCheckChange"
+      />
       <span :class="bem.e('label')" @click="handleSelected">
         <LTreeNodeContent :node="node" />
       </span>
@@ -38,6 +45,7 @@ import Switcher from './icon/Switcher'
 import Loading from './icon/Loading'
 import { computed } from 'vue'
 import LTreeNodeContent from './tree-node-content'
+import LCheckbox from '@loong/components/checkbox'
 const props = defineProps(treeNodeProps)
 const emit = defineEmits(treeNodeEmitts)
 const bem = createNameSpace('tree-node')
@@ -56,6 +64,9 @@ const handleSelected = () => {
     return
   }
   emit('select', props.node)
+}
+const handleCheckChange = (value: boolean) => {
+  emit('check', props.node, value)
 }
 </script>
 

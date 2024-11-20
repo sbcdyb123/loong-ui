@@ -1,11 +1,13 @@
 <template>
   <TreeTest></TreeTest>
   <l-icon></l-icon>
-  <z-checkbox
+  <l-checkbox
     v-model="check"
-    :disabled="true"
     :indeterminate="true"
-  ></z-checkbox>
+    @change="val => console.log(val)"
+    >节点11</l-checkbox
+  >
+  {{ check }}
 </template>
 
 <script setup lang="ts">

@@ -1,5 +1,12 @@
 <template>
-  <l-tree :data="data" v-model:selected-keys="value" multiple selectable>
+  <l-tree
+    :data="data"
+    v-model:selected-keys="value"
+    multiple
+    selectable
+    show-checkbox
+    :defalut-checked-keys="['40']"
+  >
     <template #defalut="{ node }"> {{ node.key }}-{{ node.label }} </template>
   </l-tree>
 </template>

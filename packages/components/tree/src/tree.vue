@@ -8,8 +8,13 @@
           :expanded="isExpanded(node)"
           :loadingKeys="loadingKeys"
           :selectKeys="selectKeysRef"
+          :showCheckbox="showCheckbox"
+          :checked="isChecked(node)"
+          :disabled="isDisabled(node)"
+          :indeterminate="isIndeterminate(node)"
           @select="handleSelect"
           @toggle="toggleExpand"
+          @check="toggleCheck"
         >
         </l-tree-node>
       </template>
@@ -18,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, provide, ref, useSlots, watch } from 'vue'
+import { computed, onMounted, provide, ref, useSlots, watch } from 'vue'
 import {
   key,
   treeEmitts,
@@ -73,7 +78,8 @@ const createTree = (data: TreeOption[], parent?: TreeNode): TreeNode[] => {
         level: parent ? parent.level + 1 : 0,
         disabled: !!node.disabled,
         // 判断是否是叶子节点
-        isLeaf: node.isLeaf ?? children.length === 0
+        isLeaf: node.isLeaf ?? children.length === 0,
+        parentKey: parent?.key
       }
       if (children.length > 0) {
         treeNode.children = traversal(children, treeNode)
@@ -198,6 +204,75 @@ const handleSelect = (node: TreeNode) => {
 
 provide(treeInjectKey, {
   slots: useSlots()
+})
+
+const checkedKeysRefs = ref(new Set(props.defalutCheckedKeys))
+
+function isChecked(node: TreeNode) {
+  return checkedKeysRefs.value.has(node.key)
+}
+function isDisabled(node: TreeNode) {
+  return !!node.disabled
+}
+const indeterminateRefs = ref<Set<key>>(new Set())
+
+function isIndeterminate(node: TreeNode) {
+  return indeterminateRefs.value.has(node.key)
+}
+function toggle(node: TreeNode, checked: boolean) {
+  if (!node) return
+  const checkedKeys = checkedKeysRefs.value
+  if (checked) {
+    indeterminateRefs.value.delete(node.key)
+  }
+  checkedKeys[checked ? 'add' : 'delete'](node.key)
+  if (node.children) {
+    node.children.forEach(child => {
+      if (!child.disabled) {
+        toggleCheck(child, checked)
+      }
+    })
+  }
+}
+function toggleCheck(node: TreeNode, checked: boolean) {
+  toggle(node, checked)
+  updateCheckedKeys(node)
+}
+function findNode(key: key) {
+  return flattenTree.value.find(node => node.key === key)
+}
+function updateCheckedKeys(node: TreeNode) {
+  if (node.parentKey) {
+    const parentNode = findNode(node.parentKey)
+    if (parentNode) {
+      let allChecked = true
+      let hasChecked = false
+      let nodes = parentNode.children
+      for (const node of nodes) {
+        if (checkedKeysRefs.value.has(node.key)) {
+          hasChecked = true
+        } else if (indeterminateRefs.value.has(node.key)) {
+          allChecked = false
+          hasChecked = true
+        } else {
+          allChecked = false
+        }
+      }
+      if (allChecked) {
+        checkedKeysRefs.value.add(parentNode.key)
+        indeterminateRefs.value.delete(parentNode.key)
+      } else if (hasChecked) {
+        checkedKeysRefs.value.delete(parentNode.key)
+        indeterminateRefs.value.add(parentNode.key)
+      }
+      updateCheckedKeys(parentNode)
+    }
+  }
+}
+onMounted(() => {
+  checkedKeysRefs.value.forEach((key: any) => {
+    toggle(findNode(key)!, true)
+  })
 })
 </script>
 
